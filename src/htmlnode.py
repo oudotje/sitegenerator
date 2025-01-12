@@ -13,6 +13,6 @@ class HTMLNode:
     def props_to_html(self):
         result = [f" {key}=\"{self.props[key]}\"" for key in self.props]
         return ''.join(result)
-
-test = HTMLNode(props={"href":"test", "target":"blank"})
-print(test.props_to_html())
+    
+    def __repr__(self):
+        return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
