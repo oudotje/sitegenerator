@@ -36,5 +36,79 @@ class TestDelimiter(unittest.TestCase):
         self.assertEqual(new_nodes[3].text_type, TextType.ITALIC)
         self.assertEqual(new_nodes[4].text_type, TextType.NORMAL)
 
+    def test_extract_markdown_images(self):
+        text = "This is a text with a ![text](https://test) and another ![test](http://hello)"
+        images = delimiter.extract_markdown_images(text)
+        self.assertEqual(len(images), 2)
+        self.assertEqual(images[0], ("text", "https://test"))
+
+    def test_extract_markdown_images_fail(self):
+        text = "This is a text with a [text](hello) failed matching!"
+        images = delimiter.extract_markdown_images(text)
+        self.assertEqual(len(images), 0)
+
+    def test_extract_markdown_links(self):
+        text = "This is a text with two markdown links [hello](test) and [hello1](test2)"
+        links = delimiter.extract_markdown_links(text)
+        self.assertEqual(len(links), 2)
+        self.assertEqual(links[0], ("hello", "test"))
+        self.assertEqual(links[1], ("hello1", "test2"))
+
+    def test_extract_markdown_links_fail(self):
+        text = "This is a text with a broken [link(test)"
+        links = delimiter.extract_markdown_links(text)
+        self.assertEqual(len(links), 0)
+
+    def test_split_nodes_images(self):
+        node = TextNode( "This is text with a link ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)", TextType.NORMAL,)
+        new_nodes = delimiter.split_nodes_image([node])
+        self.assertEqual(len(new_nodes), 4)
+        self.assertEqual(new_nodes[0].text, "This is text with a link ")
+        self.assertEqual(new_nodes[0].text_type, TextType.NORMAL)
+        self.assertEqual(new_nodes[1].text, "to boot dev")
+        self.assertEqual(new_nodes[1].text_type, TextType.IMAGES)
+        self.assertEqual(new_nodes[1].url, "https://www.boot.dev")
+ 
+    def test_split_nodes_images_multi(self):
+        node1 = TextNode("This is a text with image ![test](https://)", TextType.NORMAL)
+        node2 = TextNode("This is a second image ![test2](image)", TextType.NORMAL)
+        node3 = TextNode("[img](test_img)", TextType.NORMAL)
+        new_nodes = delimiter.split_nodes_image([node1, node2, node3])
+        self.assertEqual(len(new_nodes), 5)
+        self.assertEqual(new_nodes[0].text, "This is a text with image ")
+        self.assertEqual(new_nodes[0].text_type, TextType.NORMAL)
+        self.assertEqual(new_nodes[3].text, "test2")
+        self.assertEqual(new_nodes[3].url, "image")
+        self.assertEqual(new_nodes[3].text_type, TextType.IMAGES)
+
+    def test_split_nodes_images_empty(self):
+        self.assertRaises(ValueError, delimiter.split_nodes_image, [])
+
+    def test_split_nodes_images_no_image(self):
+        node = TextNode("This is a normal text node!", TextType.NORMAL)
+        new_nodes = delimiter.split_nodes_image([node])
+        self.assertEqual(len(new_nodes), 1)
+        self.assertEqual(new_nodes[0], node)
+
+    def test_split_nodes_links(self):
+        node = TextNode("This is text with a link [hello](link) and [yes](it) and [no](then)", TextType.NORMAL)
+        new_nodes = delimiter.split_nodes_link([node])
+        self.assertEqual(len(new_nodes), 6)
+        self.assertEqual(new_nodes[0].text, "This is text with a link ")
+        self.assertEqual(new_nodes[0].text_type, TextType.NORMAL)
+        self.assertEqual(new_nodes[3].text, "yes")
+        self.assertEqual(new_nodes[3].url, "it")
+        self.assertEqual(new_nodes[3].text_type, TextType.LINKS)
+
+    def test_split_nodes_links_empty(self):
+        self.assertRaises(ValueError, delimiter.split_nodes_link, [])
+
+    def test_split_nodes_links_no_link(self):
+        node = TextNode("There is no link in this node!", TextType.NORMAL)
+        new_nodes = delimiter.split_nodes_link([node])
+        self.assertEqual(len(new_nodes), 1)
+        self.assertEqual(new_nodes[0], node)
+
+
 if __name__ == "__main__":
     unittest.main()

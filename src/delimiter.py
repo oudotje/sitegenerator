@@ -19,11 +19,14 @@ def split_nodes(func, img=0):
                     if img == 1: 
                         splitted_text = node_text.split(f"![{alt_txt}]({link})", maxsplit = 1)
                     else:
-                        splitted_text = node_text.split(f"[{alt_txt}]({link})", maxplit = 1)
+                        splitted_text = node_text.split(f"[{alt_txt}]({link})", maxsplit = 1)
                     new_nodes.append(TextNode(splitted_text[0], TextType.NORMAL))
                     if len(splitted_text) != 1:
-                        new_nodes.append(TextNode(alt_txt, TextType.LINKS, link))
-                        node_text = splitted_text[1]
+                        if img == 1:
+                            new_nodes.append(TextNode(alt_txt, TextType.IMAGES, link))
+                        else:
+                            new_nodes.append(TextNode(alt_txt, TextType.LINKS, link))
+                        node.text = splitted_text[1]
         return new_nodes
     return wrapper
 
@@ -52,7 +55,7 @@ def split_nodes_image(old_nodes):
     return split_nodes_img(old_nodes)
 
 def split_nodes_link(old_nodes):
-    split_nodes_lnk = split_nodes(extract_markdwon_links)
+    split_nodes_lnk = split_nodes(extract_markdown_links)
     return split_nodes_lnk(old_nodes)
 
 def extract_markdown_images(text):
@@ -60,16 +63,7 @@ def extract_markdown_images(text):
     matches = re.findall(pattern, text) 
     return matches
 
-
 def extract_markdown_links(text):
     pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(pattern, text)
     return matches
-
-
-node = TextNode(
-        "This is text with an image ![t dev](https://www.boot.dev) and I continue testing ![test](blblbl)",
-    TextType.NORMAL,
-)
-new_nodes = split_nodes_image([node])
-print(new_nodes)
