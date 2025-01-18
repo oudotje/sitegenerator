@@ -1,8 +1,35 @@
 from textnode import TextNode, TextType
+import re
+
+def split_nodes(func, img=0):
+    def wrapper(old_nodes):
+        if old_nodes == []:
+            raise ValueError("List of nodes should not be empty")
+        
+        new_nodes = []
+        for node in old_nodes: 
+            markdown = func(node.text)
+            if markdown == []:
+                new_nodes.append(node)
+            else:
+                node_text = node.text
+                for md in markdown:
+                    alt_txt = md[0]
+                    link = md[1]
+                    if img == 1: 
+                        splitted_text = node_text.split(f"![{alt_txt}]({link})", maxsplit = 1)
+                    else:
+                        splitted_text = node_text.split(f"[{alt_txt}]({link})", maxplit = 1)
+                    new_nodes.append(TextNode(splitted_text[0], TextType.NORMAL))
+                    if len(splitted_text) != 1:
+                        new_nodes.append(TextNode(alt_txt, TextType.LINKS, link))
+                        node_text = splitted_text[1]
+        return new_nodes
+    return wrapper
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     if old_nodes == []:
-        raise ValueError("List of nodes should not be empty")
+      raise ValueError("List of nodes should not be empty")
 
     new_nodes = []
     for node in old_nodes:
@@ -20,10 +47,17 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                     new_nodes.append(TextNode(splitted_text[i], text_type))
     return new_nodes
 
+def split_nodes_image(old_nodes):
+    split_nodes_img = split_nodes(extract_markdown_images, 1)
+    return split_nodes_img(old_nodes)
+
+def split_nodes_link(old_nodes):
+    split_nodes_lnk = split_nodes(extract_markdwon_links)
+    return split_nodes_lnk(old_nodes)
 
 def extract_markdown_images(text):
     pattern = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
-    matches = re.findall(pattern, text)
+    matches = re.findall(pattern, text) 
     return matches
 
 
@@ -31,3 +65,11 @@ def extract_markdown_links(text):
     pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(pattern, text)
     return matches
+
+
+node = TextNode(
+        "This is text with an image ![t dev](https://www.boot.dev) and I continue testing ![test](blblbl)",
+    TextType.NORMAL,
+)
+new_nodes = split_nodes_image([node])
+print(new_nodes)
