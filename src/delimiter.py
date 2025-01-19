@@ -78,7 +78,7 @@ def text_to_textnodes(text):
     updated_text_nodes = [TextNode(text, TextType.NORMAL)]
     delimiters = {"**":TextType.BOLD, "*":TextType.ITALIC, "`":TextType.CODE}
     for delimiter in delimiters:
-        updated_text_nodes = split_nodes_delimiter(updated_text_nodes, delimiter, delimiters[delimiter])
+       updated_text_nodes = split_nodes_delimiter(updated_text_nodes, delimiter, delimiters[delimiter])
     updated_text_nodes = split_nodes_image(updated_text_nodes)
     updated_text_nodes = split_nodes_link(updated_text_nodes)
     return updated_text_nodes

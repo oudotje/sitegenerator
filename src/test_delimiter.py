@@ -120,8 +120,6 @@ class TestDelimiter(unittest.TestCase):
     def test_split_nodes_links(self):
         node = TextNode("This is text with a link [hello](link) and [yes](it) and [no](then)", TextType.NORMAL)
         new_nodes = delimiter.split_nodes_link([node])
-        for n in new_nodes:
-            print(n)
         self.assertEqual(len(new_nodes), 6)
         self.assertEqual(new_nodes[0].text, "This is text with a link ")
         self.assertEqual(new_nodes[0].text_type, TextType.NORMAL)
@@ -148,6 +146,42 @@ class TestDelimiter(unittest.TestCase):
         new_nodes = delimiter.split_nodes_link([node])
         self.assertEqual(len(new_nodes), 1)
         self.assertEqual(new_nodes[0], node)
+
+    def test_split_nodes_links_invalid(self):
+        node = TextNode("This node contains an invalid ![node(test)", TextType.NORMAL)
+        self.assertRaises(Exception, delimiter.split_nodes_link, node)
+
+    def test_text_to_textnodes(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        text_to_nodes = delimiter.text_to_textnodes(text)
+        expected_result = [TextNode("This is ", TextType.NORMAL), TextNode("text", TextType.BOLD), 
+                           TextNode(" with an ", TextType.NORMAL), TextNode("italic", TextType.ITALIC),
+                           TextNode(" word and a ", TextType.NORMAL), TextNode("code block", TextType.CODE),
+                           TextNode(" and an ", TextType.NORMAL), TextNode("obi wan image", TextType.IMAGES, "https://i.imgur.com/fJRm4Vk.jpeg"),
+                           TextNode(" and a ", TextType.NORMAL), TextNode("link", TextType.LINKS, "https://boot.dev")]
+        self.assertEqual(len(expected_result), len(text_to_nodes))
+        for i in range(0, len(text_to_nodes)):
+            self.assertEqual(text_to_nodes[i].text_type, expected_result[i].text_type)
+            self.assertEqual(text_to_nodes[i].text, expected_result[i].text)
+
+    def test_text_to_textnodes_empty(self):
+        text = ""
+        text_to_nodes = delimiter.text_to_textnodes(text)
+        expected_result = [TextNode("", TextType.NORMAL)]
+        self.assertEqual(len(text_to_nodes), len(expected_result))
+        self.assertEqual(text_to_nodes[0].text, expected_result[0].text)
+
+    def test_text_to_textnodes_invalid(self):
+        text = "This is a text with an invalid **bold text and a valid *italic* one"
+        self.assertRaises(Exception, delimiter.text_to_textnodes, text)
+
+    def test_text_to_textnodes_text(self):
+        text = "This a raw markdown text"
+        expected_result = [TextNode("This a raw markdown text", TextType.NORMAL)]
+        text_to_nodes = delimiter.text_to_textnodes(text)
+        self.assertEqual(len(expected_result), len(text_to_nodes))
+        self.assertEqual(expected_result[0].text, text_to_nodes[0].text)
+        self.assertEqual(expected_result[0].text_type, text_to_nodes[0].text_type)
 
 if __name__ == "__main__":
     unittest.main()
