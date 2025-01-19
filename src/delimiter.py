@@ -46,6 +46,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             if len(splitted_text) % 2 == 0:
                 raise Exception("Delimiter is not terminated, invalid MD syntax.")
 
+
             for i in range(0, len(splitted_text)):
                 if i % 2 == 0:
                     new_nodes.append(TextNode(splitted_text[i], node.text_type))

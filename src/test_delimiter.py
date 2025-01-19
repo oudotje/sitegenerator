@@ -100,6 +100,12 @@ class TestDelimiter(unittest.TestCase):
         self.assertEqual(len(new_nodes), 1)
         self.assertEqual(new_nodes[0], node)
 
+    def test_split_nodes_images_no_text(self):
+        node = TextNode("This is a [test](link) node", TextType.LINKS)
+        new_nodes = delimiter.split_nodes_image([node])
+        self.assertEqual(len(new_nodes), 1)
+        self.assertEqual(new_nodes[0], node)
+
     def test_split_nodes_links(self):
         node = TextNode("This is text with a link [hello](link) and [yes](it) and [no](then)", TextType.NORMAL)
         new_nodes = delimiter.split_nodes_link([node])
@@ -119,6 +125,11 @@ class TestDelimiter(unittest.TestCase):
         self.assertEqual(len(new_nodes), 1)
         self.assertEqual(new_nodes[0], node)
 
+    def test_split_nodes_links_no_text(self):
+        node = TextNode("This node is not a **text** node", TextType.ITALIC)
+        new_nodes = delimiter.split_nodes_link([node])
+        self.assertEqual(len(new_nodes), 1)
+        self.assertEqual(new_nodes[0], node)
 
 if __name__ == "__main__":
     unittest.main()
