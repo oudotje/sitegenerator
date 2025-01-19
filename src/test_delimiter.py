@@ -36,6 +36,17 @@ class TestDelimiter(unittest.TestCase):
         self.assertEqual(new_nodes[3].text_type, TextType.ITALIC)
         self.assertEqual(new_nodes[4].text_type, TextType.NORMAL)
 
+    def test_notexist_delimiter(self):
+        node = TextNode("This is an **italic** delimiter", TextType.NORMAL)
+        node1 = TextNode("img", TextType.IMAGES, "img.com")
+        new_nodes = delimiter.split_nodes_delimiter([node, node1], ",", TextType.ITALIC)
+        self.assertEqual(len(new_nodes), 2)
+        self.assertEqual(new_nodes[0].text, "This is an **italic** delimiter")
+        self.assertEqual(new_nodes[0].text_type, TextType.NORMAL)
+        self.assertEqual(new_nodes[1].text, "img")
+        self.assertEqual(new_nodes[1].text_type, TextType.IMAGES)
+        self.assertEqual(new_nodes[1].url, "img.com")
+
     def test_extract_markdown_images(self):
         text = "This is a text with a ![text](https://test) and another ![test](http://hello)"
         images = delimiter.extract_markdown_images(text)
@@ -109,12 +120,19 @@ class TestDelimiter(unittest.TestCase):
     def test_split_nodes_links(self):
         node = TextNode("This is text with a link [hello](link) and [yes](it) and [no](then)", TextType.NORMAL)
         new_nodes = delimiter.split_nodes_link([node])
+        for n in new_nodes:
+            print(n)
         self.assertEqual(len(new_nodes), 6)
         self.assertEqual(new_nodes[0].text, "This is text with a link ")
         self.assertEqual(new_nodes[0].text_type, TextType.NORMAL)
         self.assertEqual(new_nodes[3].text, "yes")
         self.assertEqual(new_nodes[3].url, "it")
         self.assertEqual(new_nodes[3].text_type, TextType.LINKS)
+
+    def test_split_nodes_links_second(self):
+        node = TextNode("an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)", TextType.NORMAL)
+        new_nodes = delimiter.split_nodes_link([node])
+        self.assertEqual(len(new_nodes), 2)
 
     def test_split_nodes_links_empty(self):
         self.assertRaises(ValueError, delimiter.split_nodes_link, [])

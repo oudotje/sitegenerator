@@ -29,7 +29,9 @@ def split_nodes(func, img=0):
                         new_nodes.append(TextNode(md[0], TextType.IMAGES, md[1]))
                     else:
                         new_nodes.append(TextNode(md[0], TextType.LINKS, md[1]))
-                    node_text = splitted_text[1]
+                    node_text = splitted_text[1]                    
+                if node_text != "":
+                    new_nodes.append(TextNode(node_text, TextType.NORMAL))
         return new_nodes
     return wrapper
 
@@ -40,12 +42,12 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
     for node in old_nodes:
         if delimiter not in node.text:
-            new_nodes.append(delimiter)
+            new_nodes.append(node)
+            continue
         else:
             splitted_text = node.text.split(delimiter)
             if len(splitted_text) % 2 == 0:
                 raise Exception("Delimiter is not terminated, invalid MD syntax.")
-
 
             for i in range(0, len(splitted_text)):
                 if i % 2 == 0:
@@ -71,3 +73,12 @@ def extract_markdown_links(text):
     pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(pattern, text)
     return matches
+
+def text_to_textnodes(text):
+    updated_text_nodes = [TextNode(text, TextType.NORMAL)]
+    delimiters = {"**":TextType.BOLD, "*":TextType.ITALIC, "`":TextType.CODE}
+    for delimiter in delimiters:
+        updated_text_nodes = split_nodes_delimiter(updated_text_nodes, delimiter, delimiters[delimiter])
+    updated_text_nodes = split_nodes_image(updated_text_nodes)
+    updated_text_nodes = split_nodes_link(updated_text_nodes)
+    return updated_text_nodes
