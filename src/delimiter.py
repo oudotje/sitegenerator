@@ -8,25 +8,28 @@ def split_nodes(func, img=0):
         
         new_nodes = []
         for node in old_nodes: 
+            if node.text_type != TextType.NORMAL:
+                new_nodes.append(node)
+                continue
             markdown = func(node.text)
             if markdown == []:
                 new_nodes.append(node)
+                continue 
             else:
                 node_text = node.text
                 for md in markdown:
-                    alt_txt = md[0]
-                    link = md[1]
                     if img == 1: 
-                        splitted_text = node_text.split(f"![{alt_txt}]({link})", maxsplit = 1)
+                        splitted_text = node_text.split(f"![{md[0]}]({md[1]})", maxsplit = 1)
                     else:
-                        splitted_text = node_text.split(f"[{alt_txt}]({link})", maxsplit = 1)
+                        splitted_text = node_text.split(f"[{md[0]}]({md[1]})", maxsplit = 1)
+                    if len(splitted_text) == 1:
+                        raise ValueError("The markdown link is broken")
                     new_nodes.append(TextNode(splitted_text[0], TextType.NORMAL))
-                    if len(splitted_text) != 1:
-                        if img == 1:
-                            new_nodes.append(TextNode(alt_txt, TextType.IMAGES, link))
-                        else:
-                            new_nodes.append(TextNode(alt_txt, TextType.LINKS, link))
-                        node.text = splitted_text[1]
+                    if img == 1:
+                        new_nodes.append(TextNode(md[0], TextType.IMAGES, md[1]))
+                    else:
+                        new_nodes.append(TextNode(md[0], TextType.LINKS, md[1]))
+                    node_text = splitted_text[1]
         return new_nodes
     return wrapper
 

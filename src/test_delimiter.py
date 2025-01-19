@@ -47,6 +47,11 @@ class TestDelimiter(unittest.TestCase):
         images = delimiter.extract_markdown_images(text)
         self.assertEqual(len(images), 0)
 
+    def test_extract_markdown_images_empty(self):
+        text = "This is a text with no images"
+        images = delimiter.extract_markdown_images(text)
+        self.assertEqual(len(images), 0)
+
     def test_extract_markdown_links(self):
         text = "This is a text with two markdown links [hello](test) and [hello1](test2)"
         links = delimiter.extract_markdown_links(text)
@@ -56,6 +61,11 @@ class TestDelimiter(unittest.TestCase):
 
     def test_extract_markdown_links_fail(self):
         text = "This is a text with a broken [link(test)"
+        links = delimiter.extract_markdown_links(text)
+        self.assertEqual(len(links), 0)
+
+    def test_extract_markdown_links_empty(self):
+        text = "This is a text with no link"
         links = delimiter.extract_markdown_links(text)
         self.assertEqual(len(links), 0)
 
