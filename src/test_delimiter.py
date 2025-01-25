@@ -183,5 +183,36 @@ class TestDelimiter(unittest.TestCase):
         self.assertEqual(expected_result[0].text, text_to_nodes[0].text)
         self.assertEqual(expected_result[0].text_type, text_to_nodes[0].text_type)
 
+    def test_markdown_to_blocks(self):
+        markdown = "# This is a first block\n## This is a second block\n* This is a third block"
+        expected_blocks = ["# This is a first block","## This is a second block", "* This is a third block"]
+        resulting_blocks = delimiter.markdown_to_blocks(markdown)
+        self.assertEqual(len(expected_blocks), len(resulting_blocks))
+        for i in range(0, len(expected_blocks)):
+            self.assertEqual(resulting_blocks[i], expected_blocks[i])
+
+    def test_markdown_to_blocks_empty(self):
+        markdown = ""
+        expected_blocks = []
+        resulting_blocks = delimiter.markdown_to_blocks(markdown)
+        self.assertEqual(len(expected_blocks), len(resulting_blocks))
+
+    def test_markdown_to_blocks_multinewlines(self):
+        markdown = "# This is a first block\n\n\n## This is a second block\n\n"
+        expected_blocks = ["# This is a first block", "## This is a second block"]
+        resulting_blocks = delimiter.markdown_to_blocks(markdown)
+        self.assertEqual(len(resulting_blocks), len(expected_blocks))
+        for i in range(0, len(expected_blocks)):
+            self.assertEqual(expected_blocks[i], resulting_blocks[i])
+
+    def test_markdown_to_blocks_trailing(self):
+        markdown = "   # This is a first block\n\n\n  ## This is a second block  "
+        expected_blocks = ["# This is a first block", "## This is a second block"]
+        resulting_blocks = delimiter.markdown_to_blocks(markdown)
+        self.assertEqual(len(resulting_blocks), len(expected_blocks))
+        for i in range(0, len(resulting_blocks)):
+            self.assertEqual(expected_blocks[i], resulting_blocks[i])
+
+
 if __name__ == "__main__":
     unittest.main()

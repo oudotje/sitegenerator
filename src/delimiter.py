@@ -82,3 +82,12 @@ def text_to_textnodes(text):
     updated_text_nodes = split_nodes_image(updated_text_nodes)
     updated_text_nodes = split_nodes_link(updated_text_nodes)
     return updated_text_nodes
+
+def markdown_to_blocks(markdown):
+    blocks = markdown.split("\n")
+    blocks = list(filter(lambda x: x != "", blocks))
+    blocks = list(map(str.strip, blocks))
+    return blocks
+
+
+
