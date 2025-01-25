@@ -84,7 +84,7 @@ def text_to_textnodes(text):
     return updated_text_nodes
 
 def markdown_to_blocks(markdown):
-    blocks = markdown.split("\n")
+    blocks = markdown.split("\n\n")
     blocks = list(filter(lambda x: x != "", blocks))
     blocks = list(map(str.strip, blocks))
     return blocks
