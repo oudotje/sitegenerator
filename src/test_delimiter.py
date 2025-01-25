@@ -184,7 +184,7 @@ class TestDelimiter(unittest.TestCase):
         self.assertEqual(expected_result[0].text_type, text_to_nodes[0].text_type)
 
     def test_markdown_to_blocks(self):
-        markdown = "# This is a first block\n## This is a second block\n* This is a third block"
+        markdown = "# This is a first block\n\n## This is a second block\n\n* This is a third block"
         expected_blocks = ["# This is a first block","## This is a second block", "* This is a third block"]
         resulting_blocks = delimiter.markdown_to_blocks(markdown)
         self.assertEqual(len(expected_blocks), len(resulting_blocks))
