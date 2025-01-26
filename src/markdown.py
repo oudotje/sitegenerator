@@ -34,3 +34,10 @@ def block_to_block_type(block):
     if ordered_list: 
         return "ordered_list"
     return "paragraph"
+
+def extract_title(markdown):
+    lines = markdown.splitlines()
+    for line in lines:
+        if line.startswith("# "):
+            return line.split("# ", 1)[1]
+    raise Exception("missing title")

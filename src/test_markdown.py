@@ -35,3 +35,17 @@ class TestMarkdown(unittest.TestCase):
         paragraphs = [paragraph1, paragraph2, paragraph3, paragraph4, paragraph5, paragraph6]
         for paragraph in paragraphs:
             self.assertEqual(markdown.block_to_block_type(paragraph), "paragraph")
+    
+    def test_extract_title(self):
+        title = "# Title"
+        expected_result = "Title"
+        self.assertEqual(markdown.extract_title(title), expected_result)
+    
+    def test_extract_title_exception(self):
+        title = "Title"
+        self.assertRaises(Exception, markdown.extract_title, title)
+
+    def test_extract_title_multiline(self):
+        title = "# Title\n\n## Title 2\n\n ### Title 3\nSome text"
+        expected_result = "Title"
+        self.assertEqual(markdown.extract_title(title), expected_result)
