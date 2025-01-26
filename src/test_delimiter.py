@@ -160,7 +160,7 @@ class TestDelimiter(unittest.TestCase):
                            TextNode(" and an ", TextType.NORMAL), TextNode("obi wan image", TextType.IMAGES, "https://i.imgur.com/fJRm4Vk.jpeg"),
                            TextNode(" and a ", TextType.NORMAL), TextNode("link", TextType.LINKS, "https://boot.dev")]
         self.assertEqual(len(expected_result), len(text_to_nodes))
-        for i in range(0, len(text_to_nodes)):
+        for i in range(0, len(text_to_nodes)):  
             self.assertEqual(text_to_nodes[i].text_type, expected_result[i].text_type)
             self.assertEqual(text_to_nodes[i].text, expected_result[i].text)
 

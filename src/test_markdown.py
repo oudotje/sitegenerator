@@ -1,5 +1,6 @@
 import unittest
 import markdown
+from htmlnode import LeafNode
 
 class TestMarkdown(unittest.TestCase):
     def test_block_to_block_type_heading(self):
@@ -49,3 +50,38 @@ class TestMarkdown(unittest.TestCase):
         title = "# Title\n\n## Title 2\n\n ### Title 3\nSome text"
         expected_result = "Title"
         self.assertEqual(markdown.extract_title(title), expected_result)
+
+    def test_md_headings_to_html(self):
+        heading = "### My heading"
+        obtained_result = markdown.md_heading_to_html(heading)
+        expected_result = LeafNode("h3", "My heading")
+        self.assertEqual(obtained_result.tag, expected_result.tag)
+        self.assertEqual(obtained_result.value, expected_result.value)
+    
+    def test_md_headings_to_html_repr(self):
+        heading = "### My heading"
+        obtained_result = markdown.md_heading_to_html(heading)
+        expected_result = LeafNode("h3", "My heading")
+        self.assertEqual("<h3>My heading</h3>", expected_result.to_html())
+        
+    def test_md_headings_to_html_exception(self):
+        heading = "#####"
+        self.assertRaises(Exception, markdown.md_heading_to_html, heading)
+
+    def test_md_code_to_html(self):
+        code = "```code block```"
+        obtained_result = markdown.md_code_to_html(code)
+        expected_result = LeafNode("code", "code block")
+        self.assertEqual(obtained_result.tag, expected_result.tag)
+        self.assertEqual(obtained_result.value, expected_result.value)
+
+    def test_md_code_to_html_exception(self):
+        code = "``code block```"
+        self.assertRaises(Exception, markdown.md_code_to_html, code)
+    
+    def test_md_code_to_html_longblock(self):
+        code = "````code block```"
+        obtained_result = markdown.md_code_to_html(code)
+        expected_result = LeafNode("code", "`code block")
+        self.assertEqual(obtained_result.tag, expected_result.tag)
+        self.assertEqual(obtained_result.value, expected_result.value)

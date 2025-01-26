@@ -88,6 +88,3 @@ def markdown_to_blocks(markdown):
     blocks = list(filter(lambda x: x != "", blocks))
     blocks = list(map(str.strip, blocks))
     return blocks
-
-
-
