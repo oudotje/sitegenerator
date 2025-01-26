@@ -1,4 +1,5 @@
 import delimiter
+from textnode import TextNode
 from htmlnode import LeafNode, ParentNode
 
 QUOTE_BLOCK = "quote"
@@ -55,17 +56,53 @@ def extract_title(markdown):
 def block_to_html_node(block):
     block_type = block_to_block_type(block)
     if block_type == QUOTE_BLOCK:
-        pass
+        return md_quote_to_html(block)
     if block_type == UO_LIST_BLOCK:
-        pass
+        return md_ul_to_html(block)
     if block_type == O_LIST_BLOCK:
-        pass
+        return md_ol_to_html(block)
     if block_type == PARAGRAPH: 
-        pass
+        return md_paragraph_to_html(block) 
     if block_type == CODE_BLOCK:
-        pass
+        return md_code_to_html(block)
     if block_type == HEADING_BLOCK:
         return md_heading_to_html(block)
+
+def md_paragraph_to_html(block):
+    text_nodes = delimiter.text_to_textnodes(block)
+    children = []
+    for text_node in text_nodes:
+        children.append(text_node.text_node_to_html_node())
+    return ParentNode("p", children)
+
+def md_ul_to_html(block):
+    children = []
+    block_lines = block.splitlines()
+    for line in block_lines:
+        if not (line.startswith("- ") or line.startswith("* ")):
+            raise Exception("malformed unordered list")
+        children.append(LeafNode("li", line[2:len(line)]))
+    return ParentNode("ul", children)
+
+def md_ol_to_html(block):
+    children = []
+    block_lines = block.splitlines()
+    for i in range(0, len(block_lines)):
+        if not block_lines[i].startswith(f"{'.' * (i + 1)} "):
+            raise Exception("malformed ordered list")
+        children.append(LeafNode("li", block_lines[i][i + 2:len(block_lines[i])]))
+    return ParentNode("ol", children)
+    
+
+def md_quote_to_html(block):
+    block_lines = block.splitlines()
+    text_tmp = []
+    for line in block_lines:
+        if not line.startswith(">"):
+            raise Exception("malformed markdown quotes")
+        text_tmp.append(line[1:len(line)])
+    text = '\n'.join(text_tmp)
+    return LeafNode("q", text)
 
 def md_heading_to_html(block):
     level = 0
@@ -84,7 +121,6 @@ def md_code_to_html(block):
         raise Exception("malformed code block")
     text = block[3:len(block) - 3]
     return LeafNode("code", text)
-
 
 def markdown_to_html_node(markdown):
     blocks = delimiter.makrdown_to_blocks(markdown)

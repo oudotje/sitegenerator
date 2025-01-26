@@ -44,7 +44,7 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(leaf.props['href'], node.url)
         self.assertEqual(leaf.to_html(), "<a href=\"https://www.google.com\">link</a>")
 
-    def test_to_html_imagae(self):
+    def test_to_html_image(self):
         node = TextNode("image", TextType.IMAGES, url="https://img.text")
         leaf = node.text_node_to_html_node()
         self.assertEqual(leaf.value, "")
