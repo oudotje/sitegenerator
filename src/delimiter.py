@@ -50,6 +50,8 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 raise Exception("Delimiter is not terminated, invalid MD syntax.")
 
             for i in range(0, len(splitted_text)):
+                if not splitted_text[i]:
+                    continue
                 if i % 2 == 0:
                     new_nodes.append(TextNode(splitted_text[i], node.text_type))
                 else:
@@ -78,7 +80,7 @@ def text_to_textnodes(text):
     updated_text_nodes = [TextNode(text, TextType.NORMAL)]
     delimiters = {"**":TextType.BOLD, "*":TextType.ITALIC, "`":TextType.CODE}
     for delimiter in delimiters:
-       updated_text_nodes = split_nodes_delimiter(updated_text_nodes, delimiter, delimiters[delimiter])
+        updated_text_nodes = split_nodes_delimiter(updated_text_nodes, delimiter, delimiters[delimiter])
     updated_text_nodes = split_nodes_image(updated_text_nodes)
     updated_text_nodes = split_nodes_link(updated_text_nodes)
     return updated_text_nodes

@@ -55,18 +55,20 @@ def extract_title(markdown):
 
 def block_to_html_node(block):
     block_type = block_to_block_type(block)
+    nodes = []
     if block_type == QUOTE_BLOCK:
-        return md_quote_to_html(block)
+        nodes.append(md_quote_to_html(block))
     if block_type == UO_LIST_BLOCK:
-        return md_ul_to_html(block)
+        nodes.append(md_quote_ul_to_html(block))
     if block_type == O_LIST_BLOCK:
-        return md_ol_to_html(block)
-    if block_type == PARAGRAPH: 
-        return md_paragraph_to_html(block) 
+        nodes.append(md_ol_to_html(block))
+    if block_type == PARAGRAPH_BLOCK: 
+        nodes.append(md_paragraph_to_html(block))
     if block_type == CODE_BLOCK:
-        return md_code_to_html(block)
+        nodes.append(md_code_to_html(block))
     if block_type == HEADING_BLOCK:
-        return md_heading_to_html(block)
+        nodes.append(md_heading_to_html(block))
+    return ParentNode("div", nodes)
 
 def md_paragraph_to_html(block):
     text_nodes = delimiter.text_to_textnodes(block)

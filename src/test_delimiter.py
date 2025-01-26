@@ -26,6 +26,13 @@ class TestDelimiter(unittest.TestCase):
         self.assertEqual(new_nodes[1].text_type, TextType.BOLD)
         self.assertEqual(new_nodes[2].text_type, TextType.NORMAL)
 
+    def test_bold_delimiter_2(self):
+        print("\n")
+        node = TextNode("**bold**", TextType.NORMAL)
+        new_nodes = delimiter.split_nodes_delimiter([node], "**", TextType.BOLD)
+        print("\n")
+        self.assertEqual(len(new_nodes), 1)
+                                
     def test_italic_delimiter(self):
         node = TextNode("This is an *italic* delimiter *and* this too", TextType.NORMAL)
         new_nodes = delimiter.split_nodes_delimiter([node], "*", TextType.ITALIC)

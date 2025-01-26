@@ -179,8 +179,42 @@ class TestMarkdown(unittest.TestCase):
     def test_block_to_html_node_quote(self):
         quote = ">Item 1\n>Item 2"
         obtained_result = markdown.block_to_html_node(quote)
-        expected_result = LeafNode("q", "Item 1\nItem 2")
+        children = [LeafNode("q", "Item 1\nItem 2")]
+        expected_result = ParentNode("div", children)
         self.assertEqual(type(obtained_result), type(expected_result))
         self.assertEqual(obtained_result.tag, expected_result.tag)
-        self.assertEqual(obtained_result.value, expected_result.value)
+        self.assertEqual(len(obtained_result.children), len(expected_result.children))
+        for i in range(0, len(obtained_result.children)):
+            self.assertEqual(obtained_result.children[i].tag, expected_result.children[i].tag)
+            self.assertEqual(obtained_result.children[i].value, expected_result.children[i].value)
 
+    def test_block_to_html_node_code(self):
+        code = "```code block```"
+        obtained_result = markdown.block_to_html_node(code)
+        children = [LeafNode("code", "code block")]
+        expected_result = ParentNode("div", children)
+        self.assertEqual(type(obtained_result), type(expected_result))
+        self.assertEqual(len(obtained_result.children), len(expected_result.children))
+        self.assertEqual(obtained_result.tag, expected_result.tag)
+        for i in range(0, len(obtained_result.children)):
+            self.assertEqual(obtained_result.children[i].tag, expected_result.children[i].tag)
+            self.assertEqual(obtained_result.children[i].value, expected_result.children[i].value) 
+
+    def test_block_to_html_node_paragraph(self):
+        paragraph = "This is a `code block` and an *italic text*"
+        normal_node1 = LeafNode(None, "This is a ")
+        code_node = LeafNode("code", "code block")
+        normal_node2 = LeafNode(None, " and an ")
+        italic_node = LeafNode("i", "italic text")
+        children = [normal_node1, code_node, normal_node2, italic_node]
+        expected_result = ParentNode("div", [ParentNode("p", children)])
+        obtained_result = markdown.block_to_html_node(paragraph)
+        self.assertEqual(type(obtained_result), type(expected_result))
+        self.assertEqual(obtained_result.children[0].tag, expected_result.children[0].tag)
+        self.assertEqual(len(obtained_result.children[0].children), len(expected_result.children[0].children))
+        self.assertEqual(obtained_result.tag, expected_result.tag)
+        for i in range(0, len(obtained_result.children[0].children)):
+            expected_node = expected_result.children[0].children[i]
+            obtained_node = obtained_result.children[0].children[i]
+            self.assertEqual(expected_node.tag, obtained_node.tag)
+            self.assertEqual(expected_node.value, obtained_node.value)
