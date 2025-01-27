@@ -23,7 +23,7 @@ class TestMarkdown(unittest.TestCase):
         self.assertEqual(markdown.block_to_block_type(unordered), "unordered_list")
 
     def test_block_to_block_type_ordered(self):
-        ordered = ". First point\n.. Second point\n... Third point\n.... Fourth point"
+        ordered = "1. First point\n2. Second point\n3. Third point\n4. Fourth point"
         self.assertEqual(markdown.block_to_block_type(ordered), "ordered_list")
 
     def test_block_to_block_paragrah(self):
@@ -95,14 +95,14 @@ class TestMarkdown(unittest.TestCase):
     def test_md_quote_to_html(self):
         quote = ">Quote1\n>Quote2\n>Quote3"
         obtained_result = markdown.md_quote_to_html(quote)
-        expected_result = LeafNode("q", "Quote1\nQuote2\nQuote3")
+        expected_result = LeafNode("blockquote", "Quote1\nQuote2\nQuote3")
         self.assertEqual(obtained_result.tag, expected_result.tag)
         self.assertEqual(obtained_result.value, obtained_result.value)
 
     def test_md_quote_to_html_repr(self):
         quote = ">Quote1\n>Quote2\n>Quote3"
         obtained_result = markdown.md_quote_to_html(quote)
-        expected_result = "<q>Quote1\nQuote2\nQuote3</q>"
+        expected_result = "<blockquote>Quote1\nQuote2\nQuote3</blockquote>"
         self.assertEqual(obtained_result.to_html(), expected_result)
 
     def test_md_quote_to_html_exception(self):
@@ -110,10 +110,11 @@ class TestMarkdown(unittest.TestCase):
         self.assertRaises(Exception, markdown.md_quote_to_html, quote)
 
     def test_md_ul_to_html(self):
-        unordered_list = "* Item 1\n- Item 2\n* Item 3\n- Item 4"
+        unordered_list = "* Item 1 is *italic*\n- Item 2"
         obtained_result = markdown.md_ul_to_html(unordered_list)
-        children = [LeafNode("li", "Item 1"), LeafNode("li", "Item 2"), LeafNode("li", "Item 3"), LeafNode("li", "Item 4")]
-
+        item_1 = ParentNode("li", [LeafNode(None, "Item 1 is "), LeafNode("i", "italic")])
+        item_2 = ParentNode("li", [LeafNode(None, "Item 2")])
+        children = [item_1, item_2] 
         expected_result = ParentNode("ul", children)
         self.assertEqual(type(obtained_result), type(expected_result))
         self.assertEqual(len(obtained_result.children), len(expected_result.children))
@@ -133,10 +134,12 @@ class TestMarkdown(unittest.TestCase):
         self.assertEqual(obtained_result.to_html(), expected_result)
 
     def test_md_ol_to_html(self):
-        ordered_list = ". Item 1\n.. Item 2\n... Item 3"
+        ordered_list = "1. Item 1\n2. Item 2\n3. Item 3"
         obtained_result = markdown.md_ol_to_html(ordered_list)
-        children = [LeafNode("li", "Item 1"), LeafNode("li", "Item 2"), LeafNode("li", "Item 3")]
-        expected_result = ParentNode("ol", children)
+        item_1 = ParentNode("li", LeafNode(None, "Item 1"))
+        item_2 = ParentNode("li", LeafNode(None, "Item 2"))
+        item_3 = ParentNode("li", LeafNode(None, "Item 3"))
+        expected_result = ParentNode("ol", [item_1, item_2, item_3])
         self.assertEqual(len(obtained_result.children), len(expected_result.children))
         self.assertEqual(obtained_result.tag, expected_result.tag)
         for i in range(0, len(expected_result.children)):
@@ -144,11 +147,11 @@ class TestMarkdown(unittest.TestCase):
             self.assertEqual(obtained_result.children[i].value, expected_result.children[i].value)
 
     def test_md_ol_to_html_exception(self):
-        ordered_list = ".Item 1\n.. Item 2"
+        ordered_list = "1.Item 1\n2. Item 2"
         self.assertRaises(Exception, markdown.md_ol_to_html, ordered_list)
 
     def test_md_ol_to_html_repr(self):
-        ordered_list = ". Item 1\n.. Item 2\n... Item 3"
+        ordered_list = "1. Item 1\n2. Item 2\n3. Item 3"
         obtained_result = markdown.md_ol_to_html(ordered_list).to_html()
         expected_result = "<ol><li>Item 1</li><li>Item 2</li><li>Item 3</li></ol>"
         self.assertEqual(obtained_result, expected_result)
@@ -179,7 +182,7 @@ class TestMarkdown(unittest.TestCase):
     def test_markdown_to_html_quote(self):
         quote = ">Item 1\n>Item 2"
         obtained_result = markdown.markdown_to_html_node(quote)
-        children = [LeafNode("q", "Item 1\nItem 2")]
+        children = [LeafNode("blockquote", "Item 1\nItem 2")]
         expected_result = ParentNode("div", children)
         self.assertEqual(type(obtained_result), type(expected_result))
         self.assertEqual(obtained_result.tag, expected_result.tag)

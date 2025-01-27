@@ -1,4 +1,5 @@
 import delimiter
+import os   
 from textnode import TextNode
 from htmlnode import LeafNode, ParentNode
 
@@ -30,7 +31,7 @@ def block_to_block_type(block):
         elif block_to_lines[i].startswith(tuple(["* ", "- "])) and unordered_list:
             quote_block = False
             ordered_list = False
-        elif block_to_lines[i].startswith(f"{'.' * (i + 1)} ") and ordered_list:
+        elif block_to_lines[i].startswith(f"{(i + 1)}. ") and ordered_list:
             quote_block = False
             unordered_list = False
         else:
@@ -58,7 +59,7 @@ def block_to_html_node(block):
     if block_type == QUOTE_BLOCK:
         return md_quote_to_html(block)
     if block_type == UO_LIST_BLOCK:
-        return md_quote_ul_to_html(block)
+        return md_ul_to_html(block)
     if block_type == O_LIST_BLOCK:
         return md_ol_to_html(block)
     if block_type == PARAGRAPH_BLOCK: 
@@ -70,11 +71,15 @@ def block_to_html_node(block):
     else:
         raise Exception("incorrect block type")
 
-def md_paragraph_to_html(block):
-    text_nodes = delimiter.text_to_textnodes(block)
+def normal_to_children(text_nodes):
     children = []
     for text_node in text_nodes:
         children.append(text_node.text_node_to_html_node())
+    return children
+
+def md_paragraph_to_html(block):
+    text_nodes = delimiter.text_to_textnodes(block)
+    children = normal_to_children(text_nodes) 
     return ParentNode("p", children)
 
 def md_ul_to_html(block):
@@ -83,16 +88,18 @@ def md_ul_to_html(block):
     for line in block_lines:
         if not (line.startswith("- ") or line.startswith("* ")):
             raise Exception("malformed unordered list")
-        children.append(LeafNode("li", line[2:len(line)]))
+        li_child = normal_to_children(delimiter.text_to_textnodes(line[2:len(line)]))
+        children.append(ParentNode("li", li_child))
     return ParentNode("ul", children)
 
 def md_ol_to_html(block):
     children = []
     block_lines = block.splitlines()
     for i in range(0, len(block_lines)):
-        if not block_lines[i].startswith(f"{'.' * (i + 1)} "):
+        if not block_lines[i].startswith(f"{(i + 1)}. "):
             raise Exception("malformed ordered list")
-        children.append(LeafNode("li", block_lines[i][i + 2:len(block_lines[i])]))
+        li_child = normal_to_children(delimiter.text_to_textnodes(block_lines[i][3:len(block_lines[i])]))
+        children.append(ParentNode("li", li_child))
     return ParentNode("ol", children)
     
 def md_quote_to_html(block):
@@ -101,9 +108,9 @@ def md_quote_to_html(block):
     for line in block_lines:
         if not line.startswith(">"):
             raise Exception("malformed markdown quotes")
-        text_tmp.append(line[1:len(line)])
+        text_tmp.append(line[1:len(line)].strip())
     text = '\n'.join(text_tmp)
-    return LeafNode("q", text)
+    return LeafNode("blockquote", text)
 
 def md_heading_to_html(block):
     level = 0
@@ -126,14 +133,32 @@ def md_code_to_html(block):
 def markdown_to_html_node(markdown):
     blocks = delimiter.markdown_to_blocks(markdown)
     nodes = []
-    for block in blocks:
+    for block in blocks:    
         nodes.append(block_to_html_node(block))
     return ParentNode("div", nodes)
 
-def generate_page(from_path, template_path):
+def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path) as md_file:
         markdown_string = md_file.read()
     with open(template_path) as template_file:
         template_string = template_file.read()
-    pass
+    html_root_node = markdown_to_html_node(markdown_string)
+    html_string = html_root_node.to_html()
+    print(html_string)
+    page_title = extract_title(markdown_string)
+    template_string = template_string.replace("{{ Title }}", page_title)
+    template_string = template_string.replace("{{ Content }}", html_string)
+    with open(dest_path + "/index.html", "w") as f:
+        f.write(template_string)
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    files = os.listdir(dir_path_content)
+    for file in files:
+        filepath = os.path.join(dir_path_content, file)
+        if os.path.isfile(filepath):
+            generate_page(filepath, template_path, dest_dir_path)
+        if os.path.isdir(filepath):
+            dest_folder = os.path.join(dest_dir_path, file)
+            os.mkdir(dest_folder)
+            generate_pages_recursive(filepath, template_path, dest_folder) 
