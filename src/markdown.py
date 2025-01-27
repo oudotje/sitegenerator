@@ -55,20 +55,20 @@ def extract_title(markdown):
 
 def block_to_html_node(block):
     block_type = block_to_block_type(block)
-    nodes = []
     if block_type == QUOTE_BLOCK:
-        nodes.append(md_quote_to_html(block))
+        return md_quote_to_html(block)
     if block_type == UO_LIST_BLOCK:
-        nodes.append(md_quote_ul_to_html(block))
+        return md_quote_ul_to_html(block)
     if block_type == O_LIST_BLOCK:
-        nodes.append(md_ol_to_html(block))
+        return md_ol_to_html(block)
     if block_type == PARAGRAPH_BLOCK: 
-        nodes.append(md_paragraph_to_html(block))
-    if block_type == CODE_BLOCK:
-        nodes.append(md_code_to_html(block))
+        return md_paragraph_to_html(block)
+    if block_type == CODE_BLOCK:    
+        return md_code_to_html(block)
     if block_type == HEADING_BLOCK:
-        nodes.append(md_heading_to_html(block))
-    return ParentNode("div", nodes)
+        return md_heading_to_html(block)
+    else:
+        raise Exception("incorrect block type")
 
 def md_paragraph_to_html(block):
     text_nodes = delimiter.text_to_textnodes(block)
@@ -95,7 +95,6 @@ def md_ol_to_html(block):
         children.append(LeafNode("li", block_lines[i][i + 2:len(block_lines[i])]))
     return ParentNode("ol", children)
     
-
 def md_quote_to_html(block):
     block_lines = block.splitlines()
     text_tmp = []
@@ -125,14 +124,16 @@ def md_code_to_html(block):
     return LeafNode("code", text)
 
 def markdown_to_html_node(markdown):
-    blocks = delimiter.makrdown_to_blocks(markdown)
+    blocks = delimiter.markdown_to_blocks(markdown)
+    nodes = []
     for block in blocks:
-        html_node = block_to_html_node(block)
+        nodes.append(block_to_html_node(block))
+    return ParentNode("div", nodes)
 
 def generate_page(from_path, template_path):
-    #print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path) as md_file:
         markdown_string = md_file.read()
     with open(template_path) as template_file:
         template_string = template_file.read()
-    print(f"Markdown string: {markdown_string}\nTemplate string: {template_string}")
+    pass

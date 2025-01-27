@@ -176,9 +176,9 @@ class TestMarkdown(unittest.TestCase):
             self.assertEqual(obtained_result.children[i].value, root_node.children[i].value)
             self.assertEqual(obtained_result.children[i].tag, root_node.children[i].tag)
 
-    def test_block_to_html_node_quote(self):
+    def test_markdown_to_html_quote(self):
         quote = ">Item 1\n>Item 2"
-        obtained_result = markdown.block_to_html_node(quote)
+        obtained_result = markdown.markdown_to_html_node(quote)
         children = [LeafNode("q", "Item 1\nItem 2")]
         expected_result = ParentNode("div", children)
         self.assertEqual(type(obtained_result), type(expected_result))
@@ -188,9 +188,9 @@ class TestMarkdown(unittest.TestCase):
             self.assertEqual(obtained_result.children[i].tag, expected_result.children[i].tag)
             self.assertEqual(obtained_result.children[i].value, expected_result.children[i].value)
 
-    def test_block_to_html_node_code(self):
+    def test_markdown_to_html_code(self):
         code = "```code block```"
-        obtained_result = markdown.block_to_html_node(code)
+        obtained_result = markdown.markdown_to_html_node(code)
         children = [LeafNode("code", "code block")]
         expected_result = ParentNode("div", children)
         self.assertEqual(type(obtained_result), type(expected_result))
@@ -200,7 +200,7 @@ class TestMarkdown(unittest.TestCase):
             self.assertEqual(obtained_result.children[i].tag, expected_result.children[i].tag)
             self.assertEqual(obtained_result.children[i].value, expected_result.children[i].value) 
 
-    def test_block_to_html_node_paragraph(self):
+    def test_markdown_to_html_paragraph(self):
         paragraph = "This is a `code block` and an *italic text*"
         normal_node1 = LeafNode(None, "This is a ")
         code_node = LeafNode("code", "code block")
@@ -208,7 +208,7 @@ class TestMarkdown(unittest.TestCase):
         italic_node = LeafNode("i", "italic text")
         children = [normal_node1, code_node, normal_node2, italic_node]
         expected_result = ParentNode("div", [ParentNode("p", children)])
-        obtained_result = markdown.block_to_html_node(paragraph)
+        obtained_result = markdown.markdown_to_html_node(paragraph)
         self.assertEqual(type(obtained_result), type(expected_result))
         self.assertEqual(obtained_result.children[0].tag, expected_result.children[0].tag)
         self.assertEqual(len(obtained_result.children[0].children), len(expected_result.children[0].children))
